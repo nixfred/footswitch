@@ -1,12 +1,13 @@
 [Unit]
 Description=Stream Deck Pedal to Omarchy actions
-Documentation=file:///home/pi/Projects/footswitch/README.md
+Documentation=https://github.com/nixfred/footswitch
 # Deliberately NOT Wants/After=graphical-session.target: a user unit that wants
 # it races uwsm at login and can leave the session with no GUI at all.
 
 [Service]
 Type=simple
-ExecStart=/home/pi/Projects/footswitch/footswitch
+# Adjust if you cloned elsewhere.
+ExecStart=%h/Projects/footswitch/footswitch
 # The daemon waits for the pedal itself rather than exiting when it is absent,
 # so a restart here only matters if it genuinely crashes.
 Restart=on-failure

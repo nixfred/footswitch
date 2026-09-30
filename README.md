@@ -1,5 +1,7 @@
 # footswitch
 
+![footswitch](docs/banner.png)
+
 Elgato Stream Deck Pedal (0fd9:0086) wired to Omarchy.
 
 Three switches, each acting on **press and release separately**. That split is

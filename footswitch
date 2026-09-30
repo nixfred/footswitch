@@ -31,12 +31,12 @@ DEFAULTS = {
     "buttons": {
         "0": {
             "name": "left: next colour mix",
-            "press": "/home/pi/bin/govee-lamp mix next",
+            "press": "govee-lamp mix next",
         },
         "1": {
             "name": "centre: push to dictate",
-            "press": "/usr/bin/voxtype record start",
-            "release": "/usr/bin/voxtype record stop",
+            "press": "voxtype record start",
+            "release": "voxtype record stop",
         },
         "2": {
             "name": "right: next workspace",

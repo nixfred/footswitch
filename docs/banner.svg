@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0e16"/><stop offset="100%" stop-color="#141b2d"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#26324c"/><stop offset="100%" stop-color="#151d2e"/>
+    </linearGradient>
+    <filter id="g" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="11" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .t{font-family:JetBrains Mono,DejaVu Sans Mono,monospace}
+      .k{font-size:13px;fill:#6f84a8;letter-spacing:2px}
+      .v{font-size:15px;fill:#d1e2ff}
+      .m{font-size:12px;fill:#7aa2f7}
+    </style>
+  </defs>
+  <rect width="1280" height="360" fill="url(#bg)"/>
+  <g stroke="#1b2740" stroke-width="1" opacity=".5">
+    <path d="M0 120.5H1280M0 240.5H1280"/>
+  </g>
+
+  <text class="t" x="80" y="112" font-size="62" font-weight="700" fill="#d1e2ff" letter-spacing="5">FOOTSWITCH</text>
+  <text class="t" x="84" y="150" font-size="19" fill="#7aa2f7" letter-spacing="1">Elgato Stream Deck Pedal, wired to Omarchy</text>
+  <text class="t" x="84" y="180" font-size="14" fill="#5f7599">press and release are separate, so hold-to-talk actually works</text>
+
+  <!-- three pedals -->
+  <g>
+    <rect x="760" y="120" width="140" height="96" rx="14" fill="url(#pad)" stroke="#35476a" stroke-width="2"/>
+    <rect x="928" y="120" width="140" height="96" rx="14" fill="url(#pad)" stroke="#7aa2f7" stroke-width="2.5"/>
+    <rect x="1096" y="120" width="140" height="96" rx="14" fill="url(#pad)" stroke="#35476a" stroke-width="2"/>
+    <g filter="url(#g)">
+      <circle cx="830"  cy="168" r="10" fill="#9ece6a"/>
+      <circle cx="998"  cy="168" r="10" fill="#7aa2f7"/>
+      <circle cx="1166" cy="168" r="10" fill="#ff9e64"/>
+    </g>
+  </g>
+
+  <g class="t" text-anchor="middle">
+    <text class="k" x="830"  y="246">LEFT</text>
+    <text class="k" x="998"  y="246">CENTRE</text>
+    <text class="k" x="1166" y="246">RIGHT</text>
+    <text class="v" x="830"  y="272">next colour mix</text>
+    <text class="v" x="998"  y="272">push to dictate</text>
+    <text class="v" x="1166" y="272">next workspace</text>
+    <text class="m" x="830"  y="294">tap</text>
+    <text class="m" x="998"  y="294">HOLD</text>
+    <text class="m" x="1166" y="294">tap</text>
+  </g>
+</svg>
