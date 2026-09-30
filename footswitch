@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Elgato Stream Deck Pedal, wired to Omarchy.
+
+Three footswitches, each able to act on press AND release, which is the whole
+reason a pedal beats a key: hold-to-talk is impossible on a binding that only
+fires once.
+
+Default layout (Fred, 2026-09-29):
+  left   tap   cycle the light fleet to the next mix of theme colours
+  centre HOLD  push to dictate: voxtype record start / stop
+  right  tap   next workspace on this monitor
+
+Everything is remappable in ~/.config/footswitch.json without touching this
+file. Button order is a guess until the hardware is here; if the pedals come
+out in a different order, swap the keys in the config, not the code.
+"""
+
+import json
+import os
+import shlex
+import signal
+import subprocess
+import sys
+import time
+
+CONFIG = os.path.expanduser("~/.config/footswitch.json")
+
+# Pedals are physically left, centre, right. The library indexes them 0..2;
+# which is which is unverified until the hardware arrives.
+DEFAULTS = {
+    "buttons": {
+        "0": {
+            "name": "left: next colour mix",
+            "press": "/home/pi/bin/govee-lamp mix next",
+        },
+        "1": {
+            "name": "centre: push to dictate",
+            "press": "/usr/bin/voxtype record start",
+            "release": "/usr/bin/voxtype record stop",
+        },
+        "2": {
+            "name": "right: next workspace",
+            "press": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'",
+        },
+    },
+    # A pedal is easy to knock. Ignore a second press inside this window.
+    "debounce_ms": 120,
+}
+
+
+def load_config():
+    try:
+        with open(CONFIG) as fh:
+            cfg = json.load(fh)
+    except (OSError, ValueError):
+        cfg = {}
+    merged = dict(DEFAULTS)
+    merged.update(cfg)
+    if "buttons" not in cfg:
+        merged["buttons"] = DEFAULTS["buttons"]
+    return merged
+
+
+def write_default_config():
+    if os.path.exists(CONFIG):
+        return
+    os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
+    tmp = CONFIG + ".tmp"
+    with open(tmp, "w") as fh:
+        json.dump(DEFAULTS, fh, indent=2)
+        fh.write("\n")
+    os.replace(tmp, CONFIG)
+    log("wrote default config to %s" % CONFIG)
+
+
+def log(msg):
+    # systemd captures stdout; flush so the journal is live rather than buffered.
+    print(msg, flush=True)
+
+
+def run(cmd):
+    """Fire and forget.
+
+    Never wait: a slow command must not delay the release event, or a
+    hold-to-talk pedal would keep recording after the foot came off.
+    """
+    if not cmd:
+        return
+    try:
+        subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError as exc:
+        log("command failed: %s (%s)" % (cmd, exc))
+
+
+def main():
+    from StreamDeck.DeviceManager import DeviceManager
+    from StreamDeck.ProductIDs import USBProductIDs
+
+    write_default_config()
+    cfg = load_config()
+    last = {}
+
+    def on_key(deck, key, pressed):
+        # Reloaded per event so a config edit applies without a restart.
+        conf = load_config()
+        entry = conf.get("buttons", {}).get(str(key))
+        if not entry:
+            return
+        if pressed:
+            now = time.time() * 1000.0
+            if now - last.get(key, 0) < float(conf.get("debounce_ms", 120)):
+                return
+            last[key] = now
+            log("pedal %s down: %s" % (key, entry.get("name", "")))
+            run(entry.get("press"))
+        else:
+            # Release actions are what make hold-to-talk work; they are never
+            # debounced, because a swallowed release leaves the mic recording.
+            if entry.get("release"):
+                log("pedal %s up" % key)
+                run(entry.get("release"))
+
+    while True:
+        decks = [d for d in DeviceManager().enumerate()
+                 if d.deck_type() == "Stream Deck Pedal"
+                 or getattr(d, "PRODUCT_ID", None) == USBProductIDs.USB_PID_STREAMDECK_PEDAL]
+        if not decks:
+            # The pedal may simply be unplugged. Wait rather than exit, so
+            # systemd does not have to babysit a restart loop.
+            time.sleep(5)
+            continue
+
+        deck = decks[0]
+        try:
+            deck.open()
+            log("pedal connected: %s (%d switches)" % (deck.deck_type(), deck.key_count()))
+            for k, v in sorted(load_config().get("buttons", {}).items()):
+                log("  %s -> %s" % (k, v.get("name", v.get("press", ""))))
+            deck.set_key_callback(on_key)
+            while deck.is_open():
+                time.sleep(0.5)
+        except Exception as exc:  # noqa: BLE001 - a dropped USB device must not kill the daemon
+            log("pedal error: %s" % exc)
+        finally:
+            try:
+                deck.close()
+            except Exception:  # noqa: BLE001
+                pass
+        log("pedal gone; waiting for it to come back")
+        time.sleep(3)
+
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass

@@ -1,0 +1,6 @@
+# Elgato Stream Deck Pedal (0fd9:0086).
+# TAG+="uaccess" hands the logged-in seat an ACL on the device, so the daemon
+# runs as pi with no group juggling and no root. Without this the pedal is
+# root-only and the daemon sees nothing at all.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0086", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0086", TAG+="uaccess"
