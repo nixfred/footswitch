@@ -6,7 +6,7 @@ reason a pedal beats a key: hold-to-talk is impossible on a binding that only
 fires once.
 
 Default layout (Fred, 2026-09-29):
-  left   tap   cycle the light fleet to the next mix of theme colours
+  left   tap   next Omarchy theme (wraps around)
   centre HOLD  push to dictate: voxtype record start / stop
   right  tap   next workspace on this monitor
 
@@ -30,8 +30,9 @@ CONFIG = os.path.expanduser("~/.config/footswitch.json")
 DEFAULTS = {
     "buttons": {
         "0": {
-            "name": "left: next colour mix",
-            "press": "govee-lamp mix next",
+            "name": "left: next theme",
+            "press": 'n=$(omarchy-theme-list | grep -A1 -xF "$(omarchy-theme-current)" | sed -n 2p); '
+                     '[ -n "$n" ] || n=$(omarchy-theme-list | head -1); omarchy-theme-set "$n"',
         },
         "1": {
             "name": "centre: push to dictate",
