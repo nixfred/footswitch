@@ -12,7 +12,7 @@ binding that only fires once.
 
 | pedal | action |
 |---|---|
-| **left** | tap: switch to the next Omarchy theme (wraps around) |
+| **left** | tap: next audio track (`omarchy-shell media next`) |
 | **centre** | **hold**: push to dictate (`voxtype record start` / `stop`) |
 | **right** | tap: next workspace on this monitor |
 
