@@ -6,9 +6,9 @@ reason a pedal beats a key: hold-to-talk is impossible on a binding that only
 fires once.
 
 Default layout (Fred, 2026-09-29):
-  left   tap   next audio track (omarchy-shell media next)
+  left   tap   next workspace on this monitor
   centre HOLD  push to dictate: voxtype record start / stop
-  right  tap   next workspace on this monitor
+  right  tap   next audio track (omarchy-shell media next)
 
 Everything is remappable in ~/.config/footswitch.json without touching this
 file. Button order is a guess until the hardware is here; if the pedals come
@@ -30,8 +30,8 @@ CONFIG = os.path.expanduser("~/.config/footswitch.json")
 DEFAULTS = {
     "buttons": {
         "0": {
-            "name": "left: next track",
-            "press": "omarchy-shell media next",
+            "name": "left: next workspace",
+            "press": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'",
         },
         "1": {
             "name": "centre: push to dictate",
@@ -39,8 +39,8 @@ DEFAULTS = {
             "release": "voxtype record stop",
         },
         "2": {
-            "name": "right: next workspace",
-            "press": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'",
+            "name": "right: next track",
+            "press": "omarchy-shell media next",
         },
     },
     # A pedal is easy to knock. Ignore a second press inside this window.

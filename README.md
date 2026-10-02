@@ -12,9 +12,9 @@ binding that only fires once.
 
 | pedal | action |
 |---|---|
-| **left** | tap: next audio track (`omarchy-shell media next`) |
+| **left** | tap: next workspace on this monitor |
 | **centre** | **hold**: push to dictate (`voxtype record start` / `stop`) |
-| **right** | tap: next workspace on this monitor |
+| **right** | tap: next audio track (`omarchy-shell media next`) |
 
 Remap in `~/.config/footswitch.json`. It is re-read on every event, so an edit
 applies with no restart.
