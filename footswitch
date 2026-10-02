@@ -78,6 +78,29 @@ def log(msg):
     print(msg, flush=True)
 
 
+# The service starts with the user manager, before Hyprland exists, so its own
+# environment has no compositor in it and hyprctl / omarchy-shell fail silently.
+# Read the live session values from the user manager on every press instead;
+# that also survives a Hyprland restart.
+SESSION_VARS = ("HYPRLAND_INSTANCE_SIGNATURE", "WAYLAND_DISPLAY", "DISPLAY",
+                "XDG_CURRENT_DESKTOP", "XDG_SESSION_TYPE", "DBUS_SESSION_BUS_ADDRESS",
+                "OMARCHY_PATH", "PATH")
+
+
+def session_env():
+    env = dict(os.environ)
+    try:
+        out = subprocess.run(["systemctl", "--user", "show-environment"],
+                             capture_output=True, text=True, timeout=2).stdout
+    except (OSError, subprocess.SubprocessError):
+        return env
+    for line in out.splitlines():
+        key, _, value = line.partition("=")
+        if key in SESSION_VARS and not value.startswith("$'"):
+            env[key] = value
+    return env
+
+
 def run(cmd):
     """Fire and forget.
 
@@ -88,7 +111,8 @@ def run(cmd):
         return
     try:
         subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL, start_new_session=True)
+                         stderr=subprocess.DEVNULL, start_new_session=True,
+                         env=session_env())
     except OSError as exc:
         log("command failed: %s (%s)" % (cmd, exc))
 
