@@ -14,7 +14,7 @@ binding that only fires once.
 |---|---|
 | **left** | tap: next workspace on this monitor |
 | **centre** | **hold**: push to dictate (`voxtype record start` / `stop`) |
-| **right** | tap: next audio track (`omarchy-shell media next`) |
+| **right** | tap: next track of whatever is playing (CLIAMP, Spotify, YouTube): sends MPRIS `Next` to the first player that is Playing, falling back to CLIAMP's IPC, then `omarchy-shell media next` |
 
 Remap in `~/.config/footswitch.json`. It is re-read on every event, so an edit
 applies with no restart.

@@ -8,7 +8,7 @@ fires once.
 Default layout (Fred, 2026-09-29):
   left   tap   next workspace on this monitor
   centre HOLD  push to dictate: voxtype record start / stop
-  right  tap   next audio track (omarchy-shell media next)
+  right  tap   next track of whatever is PLAYING (CLIAMP, Spotify, YouTube...)
 
 Everything is remappable in ~/.config/footswitch.json without touching this
 file. Button order is a guess until the hardware is here; if the pedals come
@@ -39,8 +39,21 @@ DEFAULTS = {
             "release": "voxtype record stop",
         },
         "2": {
-            "name": "right: next track",
-            "press": "omarchy-shell media next",
+            "name": "right: next track (whatever is playing)",
+            # Straight to the MPRIS bus, not through the shell: Quickshell's
+            # player list can miss an app that started after it (CLIAMP does).
+            # First player that is Playing gets Next; else CLIAMP's own IPC;
+            # else the old shell behaviour, so nothing regresses.
+            "press": (
+                "n=$(busctl --user --no-legend list | awk '/^org\\.mpris\\.MediaPlayer2\\./{print $1}'"
+                " | while read -r p; do busctl --user get-property \"$p\" /org/mpris/MediaPlayer2"
+                " org.mpris.MediaPlayer2.Player PlaybackStatus 2>/dev/null | grep -q Playing"
+                " && { echo \"$p\"; break; }; done);"
+                " if [ -n \"$n\" ]; then busctl --user call \"$n\" /org/mpris/MediaPlayer2"
+                " org.mpris.MediaPlayer2.Player Next;"
+                " elif cliamp status 2>/dev/null | grep -q 'State: playing'; then cliamp next;"
+                " else omarchy-shell media next; fi"
+            ),
         },
     },
     # A pedal is easy to knock. Ignore a second press inside this window.
